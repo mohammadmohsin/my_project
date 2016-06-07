@@ -4,25 +4,17 @@
     <div id="wrapper">
         <div id="container">
             <div id="welcome">
-                <h1><span>Welcome to BBC Show</span></h1>
-            </div>
-
-            <div id="status">
-                <p>
-                    <a href="/previous-show">Previous Show</a>
-                    <a href="/">Current Show</a>
-                    <a href="/next-show">Next Show</a>
-                </p>
+                <h1><span>Welcome to</span>  BBC Show</span></h1>
             </div>
 
             <div>
-                {% for key,value in currentShow %}
-                    Key : {{ key }}
-                    {% for key,value1 in value %}
-                        Key : {{ key }}
-                        value : {{ value1 }}
-                    {% endfor %}
-                {% endfor %}
+                <a href="/previous-show">Previous Show</a>
+                    <a href="/">Current Show</a>
+                    <a href="/next-show">Next Show</a>
+            </div>
+            <hr/>
+            <div>
+                {% include '::partial/readshowinfo.html.twig' %}
             </div>
             <div id="next">
 

@@ -1,0 +1,23 @@
+{% for key,value in showlists %}
+
+    {% for key1,value1 in value %}
+
+        {% if (key1 == "showStartTime") %}
+            Start Time : {{ value1 }} <br />
+        {% endif %}
+
+        {% if (key1 == "showTotalTime") %}
+            Duration : {{ value1 }} <br />
+        {% endif %}
+
+        {% if (key1 == "showTitle") %}
+            Title : {{ value1 }} <br />
+        {% endif %}
+
+        {% if (key1 == "showDescription") %}
+            Description : {{ value1 }} <br />
+        {% endif %}
+
+    {% endfor %}
+    <br />
+{% endfor %}

@@ -8,6 +8,8 @@
  */
 
 namespace AppBundle\Model;
+use \Symfony\Component\Validator\Constraints\DateTime;
+
 use \Symfony\Component\Process\Process;
 
 /**
@@ -17,118 +19,146 @@ use \Symfony\Component\Process\Process;
 class CoreShow
 {
 
-    public function getShows() {
+    public function getShows($type) {
+        if (date("I",time()) == 1)
+            $UKlocaltime = gmdate("Hi",time() +3600);
+        else
+            $UKlocaltime = gmdate("Hi",time());
+
+        $showLists = $this->getShowLists();
+        $curentShowlists = [];
+        if ($type == "C") {
+            $curentShowlists = $this->getCurrentShows($showLists, $UKlocaltime);
+        }
+        if ($type == "N") {
+            $curentShowlists = $this->getNextShows($showLists, $UKlocaltime);
+        }
+
+        if ($type == "P") {
+            $curentShowlists = $this->getPreShows($showLists, $UKlocaltime);
+        }
+
+        return $curentShowlists;
+
+    }
+
+    /*
+     * get the previous show lists
+     *
+     * return array
+     */
+    private function getPreShows($showLists, $UKlocaltime) {
+        $currentlists = [];
+        $i = 0;
+        $arrayStartFrom = 0;
+        foreach ($showLists as $row) {
+            if (($row["endTime"] >= $UKlocaltime) && ($row["showTime"] <= $UKlocaltime)) {
+                $arrayStartFrom = $i-1;
+            }
+            $i++;
+        }
+
+        $totalArrayElement = count($showLists); //exit;
+        for ($i = $arrayStartFrom; $i > 0; $i--) {
+            array_push($currentlists, $showLists[$i]);
+        }
+
+        for ($i =$totalArrayElement-1; $i> ($arrayStartFrom + 1); $i--) {
+            array_push($currentlists, $showLists[$i]);
+        }
+
+        return $currentlists;
+    }
+
+    /*
+     * get the next show list
+     *
+     * return array
+     */
+    private function getNextShows($showLists, $UKlocaltime) {
+        $currentlists = [];
+        $i = 0;
+        $arrayStartFrom = 0;
+        foreach ($showLists as $row) {
+            if (($row["endTime"] >= $UKlocaltime) && ($row["showTime"] <= $UKlocaltime)) {
+                $arrayStartFrom = $i+1;
+            }
+            $i++;
+        }
+
+        $totalArrayElement = count($showLists);
+        for ($i = $arrayStartFrom; $i < $totalArrayElement; $i++) {
+                array_push($currentlists, $showLists[$i]);
+        }
+
+        for ($i =0; $i< ($arrayStartFrom - 1); $i++) {
+            array_push($currentlists, $showLists[$i]);
+        }
+
+        return $currentlists;
+    }
+
+    /*
+     * get the current show
+     *
+     * return array
+     */
+    private function getCurrentShows($showLists, $UKlocaltime) {
+        $currentlists = [];
+        foreach ($showLists as $row) {
+            if (($row["endTime"] >= $UKlocaltime) && ($row["showTime"] <= $UKlocaltime)) {
+                array_push($currentlists, $row);
+            }
+        }
+        return $currentlists;
+    }
+
+    /*
+     * read the information from api
+     *
+     * return array
+     */
+    private function getShowLists() {
 
         $feed_url = 'http://bleb.org/tv/data/rss.php?ch=bbc1&daye=0';
         $content = file_get_contents($feed_url);
         $x = new \SimpleXmlElement($content);
-        $previousShow = array();
-        $currentShow = array();
-        $nextShow = array();
-        $tShow = array();
-        //echo "<ul>";
-        $currentTime = intval(date("Hi"));
-        $currentShowTime = $currentTime;
-        $currentShowTitle = "";
-        $showTimeDiff = 0;
-        $preStartTime = 0;
-        $sStart = "";
 
+        $mainInformation = [];
         foreach($x->channel->item as $program) {
-            //echo "<li><a href='$program->link' title='$program->title'>" . $program->title . "</a></li>";
-            $timeSet = explode(":", $program->title);
-            $showTimex = intval(trim($timeSet[0]));
-
-            $endtime = trim($timeSet[0]);
-            /*echo date("h:i",strtotime($endtime)); //exit;
-            if (($endtime == '0600') && ($preStartTime == '0000')) {
-                echo 4; //
-                echo $showTimex; echo $currentTime;
-            }
-*/
-            //if (date("h:i",strtotime($showTimex)) > date("h:i",strtotime($currentTime)) ) {
-            if ($showTimex > $currentTime) {
-                $total_show_time = $endtime - $preStartTime;
-                if ($preStartTime > 0) {
-                    array_push($nextShow, [$sStart => array("start_time" => $sStart, 'end_time' => $endtime,
-                        "total_minutes" => $total_show_time,
-                        "title" => $sTitle, "description" => $sDescription,
-                        "link" => $sLink)]);
-                    $sStart = $endtime;
-                    $sTitle = trim($timeSet[1]);
-                    $sDescription = trim($program->description);
-                    $sLink = trim($program->link);
-
-                } else {
-                    $sStart = $endtime;
-                    $sTitle = trim($timeSet[1]);
-                    $sDescription = trim($program->description);
-                    $sLink = trim($program->link);
-                }
-
-
-                $preStartTime = $endtime;
-
-            } else {
-                $endtime;
-                echo $preStartTime;
-                echo "<br />" . 9999 ."<br />";
-                $total_show_time = date("h:i",strtotime($endtime)) - date("h:i",strtotime($preStartTime));
-                //exit;
-                if ($preStartTime > 0) {
-                    echo 9999;
-                    array_push($previousShow, [$sStart => array("start_time" => $sStart, 'end_time' => $endtime,
-                        "total_minutes" => $total_show_time,
-                        "title" => $sTitle, "description" => $sDescription,
-                        "link" => $sLink)]);
-                    $sStart = $endtime;
-                    $sTitle = trim($timeSet[1]);
-                    $sDescription = trim($program->description);
-                    $sLink = trim($program->link);
-
-                } else {
-                    echo 2;
-                    $sStart = $endtime;
-                    $sTitle = trim($timeSet[1]);
-                    $sDescription = trim($program->description);
-                    $sLink = trim($program->link);
-                }
-                echo $preStartTime = $endtime;
-
-            }
-
+            $timeTitle = explode(":", $program->title);
+            $showDescription = trim($program->description);
+            $showLink = trim($program->link);
+            array_push($mainInformation, array("showTime" => trim($timeTitle[0]), 'showTitle' => trim($timeTitle[1]),
+                        "showDescription" => $showDescription, "showLink" => $showLink));
         }
-        //var_dump($tShow); exit;
-        echo "----" .$preStartTime . "----";
-        //$previousShow = array_diff_key($previousShow, [trim($timeSet[0])]);
 
-        array_push($tShow, [$sStart => array("start_time" => $sStart, 'end_time' => $endtime,
-            "total_minutes" => $total_show_time,
-            "title" => $sTitle, "description" => $sDescription,
-            "link" => $sLink)]);
-        $sStart = $endtime;
-        $sTitle = trim($timeSet[1]);
-        $sDescription = trim($program->description);
-        $sLink = trim($program->link);
+        $mainInformationDetails = [];
+        for ($i =0; $i< (count($mainInformation)-1); $i++) {
+            for ($j=$i+1; $j<($i+2); $j++ ) {
+                $showStartTime = date("g:ia",strtotime($mainInformation[$i]["showTime"]));
+                if (substr(explode(":",$showStartTime)[1],0,2) == "00") {
+                    $showStartTime = date("ga",strtotime($mainInformation[$i]["showTime"]));
+                }
+                $showEndTime = date("g:ia",strtotime($mainInformation[$j]["showTime"]));
+                if (substr(explode(":",$showEndTime)[1],0,2) == "00") {
+                    $showEndTime = date("ga",strtotime($mainInformation[$j]["showTime"]));
+                }
 
-        echo "</ul>";
-        echo "<pre>";
-        var_dump($previousShow);
-        var_dump($tShow);
-        var_dump($nextShow);
-        exit;
-       /* echo "<br />";
-        echo "--------------------------------------------------------------------------------";
-        var_dump($currentShow);
-        echo "<br />";
-        //echo $currentShowTitle;
-        echo "<br />";
-        echo "--------------------------------------------------------------------------------";
-        var_dump($previousShow);
+                $showTotalTime = round(abs(strtotime($showEndTime) - strtotime($showStartTime)) / 60,2). " minute";
+                array_push($mainInformationDetails, array("showTime" => $mainInformation[$i]["showTime"],
+                    "endTime" => $mainInformation[$j]["showTime"],
+                    "showStartTime" => $showStartTime,
+                    "showEndTime" => $showEndTime,
+                    "showTotalTime" => $showTotalTime,
+                    "showTitle" => $mainInformation[$i]["showTitle"],
+                    "showDescription" => $mainInformation[$i]["showDescription"],
+                    "showLink" => $mainInformation[$i]["showLink"]));
 
-        $shows = 1;*/
-        var_dump($currentShow);
-        return $currentShow;
+            }
+        }
+
+        return $mainInformationDetails;
     }
 
 }

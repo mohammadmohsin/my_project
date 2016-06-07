@@ -16,12 +16,11 @@ class DefaultController extends Controller
     public function indexAction(Request $request)
     {
         $cs = new CoreShow();
-        $currentShow = $cs->getShows();
-
+        $currentShow = $cs->getShows($type = "C");
 
         // replace this example code with whatever you need
         return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'currentShow' => $currentShow[0]
+            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'showlists' => $currentShow
         ));
     }
 
@@ -34,12 +33,11 @@ class DefaultController extends Controller
     public function nextShowAction(Request $request)
     {
         $cs = new CoreShow();
-        $currentShow = $cs->getShows();
-
+        $nextShow = $cs->getShows($type = "N");
 
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'currentShow' => $currentShow[0]
+        return $this->render('default/next-show.html.twig', array(
+            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'showlists' => $nextShow
         ));
     }
 
@@ -52,12 +50,12 @@ class DefaultController extends Controller
     public function previousShowAction(Request $request)
     {
         $cs = new CoreShow();
-        $currentShow = $cs->getShows();
+        $preShows = $cs->getShows($type = "P");
 
 
         // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', array(
-            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'currentShow' => $currentShow[0]
+        return $this->render('default/previous-show.html.twig', array(
+            'base_dir' => realpath($this->container->getParameter('kernel.root_dir').'/..'),'showlists' => $preShows
         ));
     }
 }

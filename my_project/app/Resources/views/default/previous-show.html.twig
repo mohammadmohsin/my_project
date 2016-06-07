@@ -7,33 +7,17 @@
                 <h1><span>Welcome to</span> BBC Previous Show</h1>
             </div>
 
-            <div id="status">
-                <p>
-                    <a href="/previous-show">Previous Show</a>
-                    <a href="/">Current Show</a>
-                    <a href="/next-show">Next Show</a>
-                </p>
-            </div>
-
             <div>
-                {% for key,value in currentShow %}
-                    Key : {{ key }}
-                    {% for key,value1 in value %}
-                        Key : {{ key }}
-                        value : {{ value1 }}
-                    {% endfor %}
-                {% endfor %}
+                <a href="/previous-show">Previous Show</a>
+                <a href="/">Current Show</a>
+                <a href="/next-show">Next Show</a>
+            </div>
+            <hr/>
+            <div>
+                {% include '::partial/readshowinfo.html.twig' %}
             </div>
             <div id="next">
-                <h2>What's next?</h2>
 
-                <p>
-
-                    Read the documentation to learn
-                    <a href="http://symfony.com/doc/{{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION')[:3] }}/book/page_creation.html">
-                        How to create your first page in Symfony
-                    </a>
-                </p>
             </div>
 
         </div>
